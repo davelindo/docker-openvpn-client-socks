@@ -19,6 +19,14 @@ RUN true \
 
 ADD sockd.conf /etc/
 
+RUN cd / && apk add --update-cache git cmake make gcc build-base \
+    && git clone https://github.com/ambrop72/badvpn.git && cd badvpn \
+    && mkdir badvpn-build && cd badvpn-build \
+    && cmake /badvpn/ -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1 \
+    && make && make install \
+    && cd / && rm -rf /badvpn \
+    && apk del --update-cache git cmake make gcc build-base
+
 ENTRYPOINT [ \
     "/bin/bash", "-c", \
     "cd /etc/openvpn && /usr/sbin/openvpn --config *.conf --up /usr/local/bin/sockd.sh" \
